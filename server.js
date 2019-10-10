@@ -21,8 +21,8 @@ app.get('/entregador/:id', (req, resp) => {
         if (err) {
             console.log(err);
             resp.status(500).end();
-        } else {
-            
+        } else {        
+            resp.status(200);    
             resp.json(result);            
         }
     });    
@@ -37,45 +37,120 @@ app.post('/entregador', (req, resp) => {
         connection.query('INSERT INTO entregadores SET ?',
         [entregador], 
         (err, result) => {
+
             if (err) {
                 console.log(err);
                 resp.status(500).end();
             } else {
                 resp.status(200);
-                resp.send(result);
+                resp.json(result);
             }
         });
     }    
 });
 
 app.put('/entregador/:id', (req, resp) => {
-    console.log('Chamou -> /entregador/:id');
-    resp.status(200).end();
+    let id_entregador = req.params.id;
+    let entregador = req.body;    
+
+    connection.query('UPDATE entregadores SET ? WHERE identregador = ?',
+    [entregador, id_entregador], 
+    (err, result ) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
-app.delete('entregador/:id', (req, resp) => {
-    console.log('Chamou -> /entregador/:id');
-    resp.status(200).end();
+app.delete('/entregador/:id', (req, resp) => {
+    let id_entregador = req.params.id;
+
+    connection.query('DELETE FROM entregadores WHERE identregador = ?',
+    [id_entregador], 
+    (err, result) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.get('/remetente/:id', (req, resp) => {
-    console.log('Chamou -> /remetente/' + req.params.id);
-    resp.status(200).end();
+    let id_remetente = req.params.id;
+
+    connection.query("SELECT * FROM remetentes WHERE idremetente = ?",
+    [id_remetente],
+    (err, result) => {
+        
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200);
+            resp.json(result);            
+        }
+    });
 });
 
 app.post('/remetente', (req, resp) => {
-    console.log('Chamou -> /remetente');
-    resp.status(200).end();
+    let remetente = req.body;
+
+    if (remetente == null) {
+        resp.status(204).end();
+    } else {
+        connection.query('INSERT INTO remetentes SET ?',
+        [remetente], 
+        (err, result) => {
+
+            if (err) {
+                console.log(err);
+                resp.status(500).end();
+            } else {
+                resp.status(200);
+                resp.json(result);
+            }
+        });
+    }
 });
 
 app.put('/remetente/:id', (req, resp) => {
-    console.log('Chamou -> /remetente/:id');
-    resp.status(200).end();
+    let id_remetente = req.params.id;
+    let remetente = req.body;    
+
+    connection.query('UPDATE remetentes SET ? WHERE idremetente = ?',
+    [remetente, id_remetente], 
+    (err, result ) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.delete('/remetente/:id', (req, resp) => {
-    console.log('Chamou -> /remetente/:id');
-    resp.status(200).end();
+    let id_remetente = req.params.id;
+
+    connection.query('DELETE FROM remetentes WHERE idremetente = ?',
+    [id_remetente], 
+    (err, result) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.get('/viagem/percurso', (req, resp) => {
@@ -84,43 +159,145 @@ app.get('/viagem/percurso', (req, resp) => {
 });
 
 app.get('/viagem/:id', (req, resp) => {
-    console.log('Chamou -> /viagem/:id');
-    resp.status(200).end();
+    let id_viagem = req.params.id;
+
+    connection.query("SELECT * FROM viagens WHERE idviagem = ?",
+    [id_viagem],
+    (err, result) => {
+        
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {        
+            resp.status(200);    
+            resp.json(result);            
+        }
+    });
 });
 
 app.post('/viagem', (req, resp) => {
-    console.log('Chamou -> /viagem');
-    resp.status(200).end();
+    let viagem = req.body;
+
+    if (viagem == null) {
+        resp.status(204).end();
+    } else {
+        connection.query('INSERT INTO viagens SET ?',
+        [viagem], 
+        (err, result) => {
+
+            if (err) {
+                console.log(err);
+                resp.status(500).end();
+            } else {
+                resp.status(200);
+                resp.json(result);
+            }
+        });
+    }
 });
 
 app.put('/viagem/:id', (req, resp) => {
-    console.log('Chamou -> /viagem/:id');
-    resp.status(200).end();
+    let id_viagem = req.params.id;
+    let viagem = req.body;    
+
+    connection.query('UPDATE viagens SET ? WHERE idviagem = ?',
+    [viagem, id_viagem], 
+    (err, result ) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.delete('/viagem/:id', (req, resp) => {
-    console.log('Chamou -> /viagem/:id');
-    resp.status(200).end();
+    let id_viagem = req.params.id;
+
+    connection.query('DELETE FROM viagens WHERE idviagem = ?',
+    [id_viagem], 
+    (err, result) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.get('/envio/:id', (req, resp) => {
-    console.log('Chamou -> /envio/:id');
-    resp.status(200).end();
+    let id_envio = req.params.id;
+
+    connection.query("SELECT * FROM envios WHERE idenvio = ?",
+    [id_envio],
+    (err, result) => {
+        
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {        
+            resp.status(200);    
+            resp.json(result);            
+        }
+    });
 });
 
 app.post('/envio', (req, resp) => {
-    console.log('Chamou -> /envio');
-    resp.status(200).end();
+    let envio = req.body;
+
+    if (envio == null) {
+        resp.status(204).end();
+    } else {
+        connection.query('INSERT INTO envios SET ?',
+        [envio], 
+        (err, result) => {
+
+            if (err) {
+                console.log(err);
+                resp.status(500).end();
+            } else {
+                resp.status(200);
+                resp.json(result);
+            }
+        });
+    }
 });
 
 app.put('/envio/:id', (req, resp) => {
-    console.log('Chamou -> /envio/:id');
-    resp.status(200).end();
+    let id_envio = req.params.id;
+    let envio = req.body;    
+
+    connection.query('UPDATE envios SET ? WHERE idenvio = ?',
+    [envio, id_envio], 
+    (err, result ) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.delete('/envio/:id', (req, resp) => {
-    console.log('Chamou -> /envio/:id');
-    resp.status(200).end();
+    let id_envio = req.params.id;
+
+    connection.query('DELETE FROM envios WHERE idenvio = ?',
+    [id_envio], 
+    (err, result) => {
+
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {
+            resp.status(200).end();
+        }
+    });
 });
 
 app.put('/envio/:id/finalizar', (req, resp) => {
