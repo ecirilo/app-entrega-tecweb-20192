@@ -93,11 +93,8 @@ app.get('/viagem/percurso', (req, resp) => {
     resp.status(200).end();
 });
 
-app.get('/viagem/:id', (req, resp) => {
-    let id_viagem = req.params.id;
-
-    connection.query("SELECT * FROM viagens WHERE idviagem = ?",
-    [id_viagem],
+app.get('/viagens', (req, resp) => {
+    connection.query("SELECT * FROM viagens",
     (err, result) => {
         
         if (err) {
@@ -110,8 +107,28 @@ app.get('/viagem/:id', (req, resp) => {
     });
 });
 
+
+app.get('/viagem/:id', (req, resp) => {
+    let id_viagem = req.params.id;
+
+    connection.query("SELECT * FROM viagens WHERE idviagem = ?",
+    [id_viagem],
+    (err, result) => {
+        
+        if (err) {
+            console.log(err);
+            resp.status(500).end();
+        } else {        
+            resp.status(200);    
+            resp.json(result[0]);            
+        }
+    });
+});
+
 app.post('/viagem', (req, resp) => {
     let viagem = req.body;
+    
+    console.log(viagem);
 
     if (viagem == null) {
         resp.status(204).end();
