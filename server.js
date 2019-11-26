@@ -14,10 +14,47 @@ app.use(cors());
 
 const entregador_service = require('./services/entregador.js');
 
-app.use(express.json());
-app.use(entregador_service(connection));
+verifica_token = (req, resp, next) => {
+    let token = req.headers['x-access-token'];
 
-app.get('/remetente/:id', (req, resp) => {
+    if (!token)
+        return resp.status(401).end();
+
+    jwt.verify(token, 'gabigolemelhoquezico', (err, decoded) => {
+        if (err)
+            return resp.status(401).end();
+
+        req.id_usuario_logado = decoded.id
+        next();
+    });
+}
+
+app.use(express.json());
+app.use(entregador_service(connection, verifica_token));
+
+const jwt = require('jsonwebtoken');
+
+app.post('/login', (req, resp) => {
+    let user = req.body;
+
+    connection.query("SELECT * FROM usuarios WHERE nome = ? and senha = ?",
+    [user.nome, user.senha],
+    (err, result) => {
+
+        if (result.length == 0) {
+            resp.status(401).end();
+        } else {
+            let token = jwt.sign({id: result[0].idusuario}, 'gabigolemelhoquezico', {
+                expiresIn: 6000        
+            });
+    
+            resp.status(200);
+            resp.send({token: token});
+        }        
+    })
+});
+
+app.get('/remetente/:id', verifica_token, (req, resp) => {
     let id_remetente = req.params.id;
 
     connection.query("SELECT * FROM remetentes WHERE idremetente = ?",
@@ -34,7 +71,7 @@ app.get('/remetente/:id', (req, resp) => {
     });
 });
 
-app.post('/remetente', (req, resp) => {
+app.post('/remetente', verifica_token, (req, resp) => {
     let remetente = req.body;
 
     if (remetente == null) {
@@ -55,7 +92,7 @@ app.post('/remetente', (req, resp) => {
     }
 });
 
-app.put('/remetente/:id', (req, resp) => {
+app.put('/remetente/:id', verifica_token, (req, resp) => {
     let id_remetente = req.params.id;
     let remetente = req.body;    
 
@@ -72,7 +109,7 @@ app.put('/remetente/:id', (req, resp) => {
     });
 });
 
-app.delete('/remetente/:id', (req, resp) => {
+app.delete('/remetente/:id', verifica_token, (req, resp) => {
     let id_remetente = req.params.id;
 
     connection.query('DELETE FROM remetentes WHERE idremetente = ?',
@@ -88,27 +125,31 @@ app.delete('/remetente/:id', (req, resp) => {
     });
 });
 
-app.get('/viagem/percurso', (req, resp) => {
+app.get('/viagem/percurso', verifica_token, (req, resp) => {
     console.log('Chamou -> /viagem/percurso');
     resp.status(200).end();
 });
 
-app.get('/viagens', (req, resp) => {
-    connection.query("SELECT * FROM viagens",
+app.get('/viagens', verifica_token, (req, resp) => {
+    connection.query("SELECT * " +
+                "FROM viagens as v " +
+                "JOIN entregadores as e on v.identregador = e.identregador " + 
+                "WHERE v.idusuario = ?",
+    [req.id_usuario_logado],
     (err, result) => {
         
         if (err) {
             console.log(err);
             resp.status(500).end();
-        } else {        
-            resp.status(200);    
+        } else {
+            resp.status(200);  
             resp.json(result);            
         }
     });
 });
 
 
-app.get('/viagem/:id', (req, resp) => {
+app.get('/viagem/:id', verifica_token, (req, resp) => {
     let id_viagem = req.params.id;
 
     connection.query("SELECT * FROM viagens WHERE idviagem = ?",
@@ -125,7 +166,7 @@ app.get('/viagem/:id', (req, resp) => {
     });
 });
 
-app.post('/viagem', (req, resp) => {
+app.post('/viagem', verifica_token, (req, resp) => {
     let viagem = req.body;
     
     console.log(viagem);
@@ -148,7 +189,7 @@ app.post('/viagem', (req, resp) => {
     }
 });
 
-app.put('/viagem/:id', (req, resp) => {
+app.put('/viagem/:id', verifica_token, (req, resp) => {
     let id_viagem = req.params.id;
     let viagem = req.body;    
 
@@ -165,7 +206,7 @@ app.put('/viagem/:id', (req, resp) => {
     });
 });
 
-app.delete('/viagem/:id', (req, resp) => {
+app.delete('/viagem/:id', verifica_token, (req, resp) => {
     let id_viagem = req.params.id;
 
     connection.query('DELETE FROM viagens WHERE idviagem = ?',
@@ -181,7 +222,7 @@ app.delete('/viagem/:id', (req, resp) => {
     });
 });
 
-app.get('/envios', (req, resp) => {
+app.get('/envios', verifica_token, (req, resp) => {
     connection.query("SELECT * FROM envios",
     (err, result) => {        
         if (err) {
@@ -194,7 +235,7 @@ app.get('/envios', (req, resp) => {
     });
 });
 
-app.get('/envio/:id', (req, resp) => {
+app.get('/envio/:id', verifica_token, (req, resp) => {
     let id_envio = req.params.id;
 
     connection.query("SELECT * FROM envios WHERE idenvio = ?",
@@ -206,12 +247,12 @@ app.get('/envio/:id', (req, resp) => {
             resp.status(500).end();
         } else {        
             resp.status(200);    
-            resp.json(result);            
+            resp.json(result[0]);            
         }
     });
 });
 
-app.post('/envio', (req, resp) => {
+app.post('/envio', verifica_token, (req, resp) => {
     let envio = req.body;
 
     if (envio == null) {
@@ -232,7 +273,7 @@ app.post('/envio', (req, resp) => {
     }
 });
 
-app.put('/envio/:id', (req, resp) => {
+app.put('/envio/:id', verifica_token, (req, resp) => {
     let id_envio = req.params.id;
     let envio = req.body;    
 
@@ -249,7 +290,7 @@ app.put('/envio/:id', (req, resp) => {
     });
 });
 
-app.delete('/envio/:id', (req, resp) => {
+app.delete('/envio/:id', verifica_token, (req, resp) => {
     let id_envio = req.params.id;
 
     connection.query('DELETE FROM envios WHERE idenvio = ?',
@@ -265,12 +306,12 @@ app.delete('/envio/:id', (req, resp) => {
     });
 });
 
-app.put('/envio/:id/finalizar', (req, resp) => {
+app.put('/envio/:id/finalizar', verifica_token, (req, resp) => {
     console.log('Chamou -> /envio/:id/finalizar');
     resp.status(200).end();
 });
 
-app.put('/envio/:id/avaliar', (req, resp) => {
+app.put('/envio/:id/avaliar', verifica_token, (req, resp) => {
     console.log('Chamou -> /envio/:id/avaliar');
     resp.status(200).end();
 });

@@ -1,9 +1,9 @@
 const express = require('express');
 
-module.exports = (connection) => {
+module.exports = (connection, verifica_token) => {
     const router = express.Router();
     
-    router.get('/entregador/:id', (req, resp) => {
+    router.get('/entregador/:id', verifica_token, (req, resp) => {
         let id_entregador = req.params.id;
     
         connection.query("SELECT * FROM entregadores WHERE identregador = ?",
@@ -20,7 +20,7 @@ module.exports = (connection) => {
         });    
     });
     
-    router.post('/entregador', (req, resp) => {
+    router.post('/entregador', verifica_token, (req, resp) => {
         let entregador = req.body;
     
         if (entregador == null) {
@@ -41,7 +41,7 @@ module.exports = (connection) => {
         }    
     });
     
-    router.put('/entregador/:id', (req, resp) => {
+    router.put('/entregador/:id', verifica_token, (req, resp) => {
         let id_entregador = req.params.id;
         let entregador = req.body;    
     
@@ -58,7 +58,7 @@ module.exports = (connection) => {
         });
     });
     
-    router.delete('/entregador/:id', (req, resp) => {
+    router.delete('/entregador/:id', verifica_token, (req, resp) => {
         let id_entregador = req.params.id;
     
         connection.query('DELETE FROM entregadores WHERE identregador = ?',
