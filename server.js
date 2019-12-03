@@ -17,6 +17,9 @@ const entregador_service = require('./services/entregador.js');
 verifica_token = (req, resp, next) => {
     let token = req.headers['x-access-token'];
 
+    console.log("Chegou");
+    console.log(token);
+
     if (!token)
         return resp.status(401).end();
 
@@ -34,22 +37,23 @@ app.use(entregador_service(connection, verifica_token));
 
 const jwt = require('jsonwebtoken');
 
-app.post('/login', (req, resp) => {
-    let user = req.body;
+app.post('/auth', (req, resp) => {
+    let user = req.body;    
 
     connection.query("SELECT * FROM usuarios WHERE nome = ? and senha = ?",
     [user.nome, user.senha],
     (err, result) => {
 
         if (result.length == 0) {
-            resp.status(401).end();
+            resp.status(401);
+            resp.send({token: null, success: false});
         } else {
             let token = jwt.sign({id: result[0].idusuario}, 'gabigolemelhoquezico', {
                 expiresIn: 6000        
             });
     
             resp.status(200);
-            resp.send({token: token});
+            resp.send({token: token, success: true});
         }        
     })
 });
